@@ -113,7 +113,7 @@ EOF
 </html>
 ```
 
-### 2. updatefile.tf 생성
+### 2. updateindex.tf 생성
 ```tf
 resource "aws_s3_bucket_object" "main_html" {
   bucket       = "{S3 버킷 이름}" 
