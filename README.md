@@ -15,16 +15,16 @@
 
 <br/>
 
-## 🧩 작업 전1:파일 구조
+## 🧩 작업 전1:테라폼 설치
 ```bash
-username@awsclient:~/s3bucket$ tree
-.
-├── index.html
-├── main.html
-├── provider.txt
-├── resource.tf
-├── updateIndex.tf
-└── updateMain.tf
+sudo su - # root 계정 접속
+
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+
+
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+
+apt-get update && apt-get install terraform -y
 ```
 
 <br/>
@@ -36,6 +36,70 @@ terraform init # Terraform 프로젝트를 초기화
 terraform plan # 현재 상태와 정의된 인프라를 비교하여 실행할 변경 사항을 미리 보여줌
 
 terraform apply # 변경 사항을 실제로 적용하여 인프라를 업데이트
+```
+
+<br/>
+
+## 🧩 작업 전3:S3 버킷 사용 권한 부여 설정
+```tf
+# IAM 역할 생성
+resource "aws_iam_role" "s3_create_bucket_role" {
+  name = "s3-create-bucket-role"
+  
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Action": "sts:AssumeRole",
+        "Effect": "Allow",
+        "Principal": {
+          "Service": "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+# IAM 정책 정의 (S3에 대한 모든 권한 부여)
+resource "aws_iam_policy" "s3_full_access_policy" {
+  name        = "s3-full-access-policy"
+  description = "Full access to S3 resources"
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:*"  # 모든 S3 액세스 허용
+        ]
+        Resource = [
+          "*"  # 모든 S3 리소스에 대한 권한
+        ]
+      }
+    ]
+  })
+}
+
+# IAM 역할에 정책 연결
+resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
+  role       = aws_iam_role.s3_create_bucket_role.name
+  policy_arn = aws_iam_policy.s3_full_access_policy.arn
+}
+```
+
+<br/>
+
+## 🧩 작업 전4:파일 구조
+```bash
+username@awsclient:~/s3bucket$ tree
+.
+├── index.html
+├── main.html
+├── provider.txt
+├── resource.tf
+├── updateIndex.tf
+└── updateMain.tf
 ```
 
 <br/>
@@ -184,6 +248,8 @@ output "s3_object_url_main" {
 
 2. main.html 접속 됨
 <img src="https://github.com/user-attachments/assets/9d64ff6c-394d-4adb-87a4-8016526d3ce4" width="70%">
+
+<br/>
 
 ## 🎈 느낀점
 Terraform을 사용하여 S3 버킷에 파일을 간편하게 업로드하고 업데이트할 수 있었음. 코드로 정의된 인프라를 통해 설정과 배포를 쉽게 처리할 수 있었고, 개발 과정에서 발생할 수 있는 오류를 줄이는 데 큰 도움이 될 거라 생각이 들었음. Terraform의 변경 감지 및 업데이트 기능 덕분에, S3 버킷의 파일이 변경되었을 때만 업데이트가 이루어지는 것을 보며 자원 관리를 효율적으로 할 수 있다는 점이 매우 유익하게 느껴졌음.
