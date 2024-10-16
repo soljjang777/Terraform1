@@ -15,7 +15,7 @@
 
 <br/>
 
-## 🧩 작업 전1:테라폼 설치
+## 🧩 작업 전1:Terraform Install
 ```bash
 sudo su - # root 계정 접속
 
@@ -36,6 +36,16 @@ terraform init # Terraform 프로젝트를 초기화
 terraform plan # 현재 상태와 정의된 인프라를 비교하여 실행할 변경 사항을 미리 보여줌
 
 terraform apply # 변경 사항을 실제로 적용하여 인프라를 업데이트
+
+terraform apply -auto-approve # 사용자로부터 적용 확인을 받지 않고 자동으로 승인하여 바로 인프라 변경을 실행
+
+terraform destroy # 모든 인프라 리소스 삭제
+
+terraform validate # Terraform 코드가 문법적으로 유효한지 확인
+
+terraform output # output 블록에서 정의된 값 터미널에 출력
+
+terraform apply -target={리소스 유형}.{리소스 이름} # 파일에 정의된 해당 리소스만 적용하여 인프라를 업데이트
 ```
 
 <br/>
@@ -190,7 +200,7 @@ output "s3_object_url_main" {
   value = "https://${aws_s3_bucket_object.main_html.bucket}.s3.amazonaws.com/${aws_s3_bucket_object.main_html.key}"
 }
 ```
-### 3. 테라폼 추가 후 output로 브라우저 접속 결과
+### 3. Terraform 리소스를 성공적으로 배포한 후, output 블록에서 생성된 URL에 직접 접속하여 배포된 결과를 확인
 <img src="https://github.com/user-attachments/assets/2a38193e-e8b9-4ff1-9178-6c6f4ba50989" width="70%">
 
 
@@ -240,7 +250,7 @@ output "s3_object_url_main" {
 }
 ```
 
-### 5. 테라폼 추가 후 output로 브라우저 접속 결과
+### 5. Terraform 리소스를 성공적으로 배포한 후, output 블록에서 생성된 URL에 직접 접속하여 배포된 결과를 확인
 1. index.html 접속 후 버튼을 클릭
 <img src="https://github.com/user-attachments/assets/dbdc6535-7119-4ce1-9cbd-01a18323229f" width="70%">
 
